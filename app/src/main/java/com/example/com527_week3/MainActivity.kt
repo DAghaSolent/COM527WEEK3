@@ -35,19 +35,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.com527_week3.ui.theme.COM527_WEEK3Theme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             COM527_WEEK3Theme {
+                val navController = rememberNavController()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MessageApp()
+                    NavHost(navController = navController, startDestination = "ShoppingList"){
+                        composable("ShoppingList"){
+                            ShoppingList(AddItemScreenCallBack = {navController.navigate("AddItemScreen")})
+                        }
+                        composable("AddItemScreen"){
+                            AddItemScreen(navController)
+                        }
+                    }
                 }
             }
         }
@@ -124,7 +137,7 @@ fun Ex1_5FtoM(){
 }
 
 @Composable
-fun ShoppingList(){
+fun ShoppingList(AddItemScreenCallBack: () -> Unit){
     var list by remember { mutableStateOf(listOf<String>()) }
     var listInput by remember { mutableStateOf("") }
     Column {
@@ -159,6 +172,23 @@ fun ShoppingList(){
             items(list) {
                     listInput -> Text(listInput)
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+        
+        Row {
+            Button(onClick = { AddItemScreenCallBack() }) {
+                Text("Add Item Screen")
+            }
+        }
+    }
+}
+
+@Composable
+fun AddItemScreen(navController: NavController){
+    Column {
+        Row {
+            Button(onClick = { navController.popBackStack() }) {
+                Text("View Current Shopping List")
             }
         }
     }
