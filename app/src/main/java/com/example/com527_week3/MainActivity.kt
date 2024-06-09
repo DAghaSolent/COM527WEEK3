@@ -20,8 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.activity.viewModels
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -64,23 +69,35 @@ class MainActivity : ComponentActivity() {
                 // pass the state variable down to the shopping list composable(Done)
                 // Try and follow what you did for Week 7 Exercise 1 with the call backs that you did
 
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    NavHost(navController = navController, startDestination = "ShoppingList"){
-                        composable("ShoppingList"){
-                            ShoppingList(AddItemScreenCallBack = {navController.navigate("AddItemScreen")}, list)
-                        }
-                        composable("AddItemScreen"){
-                            // don't pass in the nav controller or view model here
-                            // instead, pass in a callback
-                            // the callback should add the item to the view model (Done)
-                            AddItemScreen(ShoppingListCallBack = {listInput ->
-                                viewModel.addItem(listInput)
-                                navController.navigate("ShoppingList")
-                            })
+                Scaffold(
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = {navController.navigate("AddItemScreen")},
+                            content = {Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Item Page")}
+                        )
+                    }
+                )
+                {
+                    // A surface container using the 'background' color from the theme
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        NavHost(navController = navController, startDestination = "ShoppingList"){
+                            composable("ShoppingList"){
+                                ShoppingList(AddItemScreenCallBack = {navController.navigate("AddItemScreen")}, list)
+                            }
+                            composable("AddItemScreen"){
+                                // don't pass in the nav controller or view model here
+                                // instead, pass in a callback
+                                // the callback should add the item to the view model (Done)
+                                AddItemScreen(ShoppingListCallBack = {listInput ->
+                                    viewModel.addItem(listInput)
+                                    navController.navigate("ShoppingList")
+                                })
+                            }
                         }
                     }
                 }
