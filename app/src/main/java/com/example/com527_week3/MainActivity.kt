@@ -2,6 +2,7 @@ package com.example.com527_week3
 
 import android.os.Bundle
 import android.view.Gravity
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -178,6 +180,7 @@ fun ShoppingList(AddItemScreenCallBack: () -> Unit, list: List<String>){
 @Composable
 fun AddItemScreen(ShoppingListCallBack: (String) -> Unit){
     var listInput by remember { mutableStateOf("") }
+    val context = LocalContext.current
     Column {
 
         Row {
@@ -185,9 +188,16 @@ fun AddItemScreen(ShoppingListCallBack: (String) -> Unit){
         }
 
         Row {
-            Button(onClick = { ShoppingListCallBack(listInput) }) {
+            
+            Button(onClick = { if(listInput.isNotBlank()){
+                ShoppingListCallBack(listInput)
+            } else {
+                Toast.makeText(context, "Enter Item in Text Field", Toast.LENGTH_LONG).show()
+            }
+            }) {
                 Text("Add Item to Shopping List")
             }
+
             Button(onClick = { listInput = "" }, modifier = Modifier.weight(1.0f)) {
                 Text("Clear Item")
             }
