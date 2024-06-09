@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.activity.viewModels
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,6 +49,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             COM527_WEEK3Theme {
                 val navController = rememberNavController()
+                val viewModel : ShoppingListViewModel by viewModels()
+                var list by remember { mutableStateOf(listOf<String>()) }
+
+                viewModel.liveShoppingList.observe(this){
+                    list = viewModel.shoppingList
+                }
+
+                // Notes below to complete Week 7 Exercise 2 exercises
+                // State variable containing the shopping list (Done)
+                // observe the live data in the view model, so when it changes, you update the state variable(Done)
+                // pass the state variable down to the shopping list composable(Done)
+                // Try and follow what you did for Week 7 Exercise 1 with the call backs that you did
+
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -55,10 +69,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(navController = navController, startDestination = "ShoppingList"){
                         composable("ShoppingList"){
-                            ShoppingList(AddItemScreenCallBack = {navController.navigate("AddItemScreen")})
+                            ShoppingList(AddItemScreenCallBack = {navController.navigate("AddItemScreen")}, list)
                         }
                         composable("AddItemScreen"){
-                            AddItemScreen(navController)
+                            // don't pass in the nav controller or view model here
+                            // instead, pass in a callback
+                            // the callback should add the item to the view model (Done)
+                            AddItemScreen(ShoppingListCallBack = {listInput ->
+                                viewModel.addItem(listInput)
+                                navController.navigate("ShoppingList")
+                            })
                         }
                     }
                 }
@@ -137,41 +157,13 @@ fun Ex1_5FtoM(){
 }
 
 @Composable
-fun ShoppingList(AddItemScreenCallBack: () -> Unit){
-    var list by remember { mutableStateOf(listOf<String>()) }
-    var listInput by remember { mutableStateOf("") }
+fun ShoppingList(AddItemScreenCallBack: () -> Unit, list: List<String>){
+
     Column {
-        TextField(value = listInput, onValueChange = {listInput = it}, modifier = Modifier.fillMaxWidth())
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = {
-                // Creating a temporary list to reset the list state variable to force a re render.
-                var tempList = list.toMutableList()
-
-                // Adding the item to temporary list
-                tempList.add(listInput)
-
-                // Changing the the current list state to the temp list that I setup in the button.
-                list = tempList
-            },
-                modifier = Modifier.weight(2.0f)
-                ) {
-                Text("Add Item to Shopping List")
-            }
-
-            Button(onClick = { listInput = " " }, modifier = Modifier.weight(1.0f)) {
-                Text("Clear Item")
-            }
-        }
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         // Lazy Column created to showcase the Shopping List out to the users.
         LazyColumn {
-            items(list) {
-                    listInput -> Text(listInput)
-                Spacer(modifier = Modifier.height(8.dp))
+            items(list){
+                item -> Text(item)
             }
         }
         
@@ -184,11 +176,20 @@ fun ShoppingList(AddItemScreenCallBack: () -> Unit){
 }
 
 @Composable
-fun AddItemScreen(navController: NavController){
+fun AddItemScreen(ShoppingListCallBack: (String) -> Unit){
+    var listInput by remember { mutableStateOf("") }
     Column {
+
         Row {
-            Button(onClick = { navController.popBackStack() }) {
-                Text("View Current Shopping List")
+            TextField(value = listInput, onValueChange = {listInput = it}, modifier = Modifier.fillMaxWidth())
+        }
+
+        Row {
+            Button(onClick = { ShoppingListCallBack(listInput) }) {
+                Text("Add Item to Shopping List")
+            }
+            Button(onClick = { listInput = "" }, modifier = Modifier.weight(1.0f)) {
+                Text("Clear Item")
             }
         }
     }
